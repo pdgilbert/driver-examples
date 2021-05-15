@@ -1,5 +1,6 @@
 on:
   push:
+    branches: [ master, generic-bare-metal ]
   pull_request:
   schedule:
     - cron: 0 1 * * 1
@@ -44,56 +45,151 @@ env:
 # veml6070 Git version is not compatible. Deactivated until a new version is released.
 
 jobs:
-  ci-bare-metal:
+#  ci-bare-metal:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        rust: [stable, beta]
+#        SUBFOLDER:
+#          - stm32f3-discovery
+#          - stm32f1-bluepill
+#          - microbit
+#
+#        VERSION:
+#          - released
+#          - git
+#
+#        include:
+#          - SUBFOLDER: stm32f3-discovery
+#            TARGET: thumbv7em-none-eabihf
+#
+#          - SUBFOLDER: stm32f1-bluepill
+#            TARGET: thumbv7m-none-eabi
+#
+#          - SUBFOLDER: microbit
+#            TARGET: thumbv6m-none-eabi
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions-rs/toolchain@v1
+#        with:
+#          profile: minimal
+#          toolchain: ${{ matrix.rust }}
+#          target: ${{ matrix.TARGET }}
+#          override: true
+#
+#      - name: Checkout CI scripts
+#        uses: actions/checkout@v2
+#        with:
+#          repository: 'eldruin/rust-driver-ci-scripts'
+#          ref: 'master'
+#          path: 'ci'
+#
+#      - run: ../ci/patch-no-std.sh
+#        working-directory: ${{ matrix.SUBFOLDER }}
+#
+#      - run: ../ci/patch-git-drivers.sh
+#        working-directory: ${{ matrix.SUBFOLDER }}
+#        if: contains(matrix.VERSION, 'git')
+#
+#      - name: Build
+#        working-directory: ${{ matrix.SUBFOLDER }}
+#        run: cargo build --target=${{ matrix.TARGET }} --examples
+
+  generic-bare-metal:
+    name: eg
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
-        rust: [stable, beta]
-        SUBFOLDER:
-          - stm32f3-discovery
-          - stm32f1-bluepill
-          - microbit
-
-        VERSION:
-          - released
-          - git
+        mcu: [stm32f103, stm32f303xc, ]
+#        mcu: [stm32f030xc, stm32f100, stm32f101, stm32f103, stm32f303xc, stm32f401, stm32f411, stm32f722,
+#              stm32h742, stm32l072kztx, stm32l100, stm32l151, stm32l4x2, ]
+        
+        eg:  [ad9833-midi-player, ads1015-adc-display, ]
 
         include:
-          - SUBFOLDER: stm32f3-discovery
-            TARGET: thumbv7em-none-eabihf
-
-          - SUBFOLDER: stm32f1-bluepill
-            TARGET: thumbv7m-none-eabi
-
-          - SUBFOLDER: microbit
-            TARGET: thumbv6m-none-eabi
-
+           #- mcu:  stm32f042  NB commented out sections need mcu removed from mcu: or matrix is messed up
+           #  hal: "stm32f0xx"
+           #  trg: "thumbv6m-none-eabi"
+           #  brd: "none-stm32f042"
+#           - mcu:  stm32f030xc
+#             hal: "stm32f0xx"
+#             trg: "thumbv6m-none-eabi"   
+#             brd: "none-stm32f030"
+#           - mcu:  stm32f100
+#             hal: "stm32f1xx"
+#             trg: "thumbv7m-none-eabi"
+#             brd: "none-stm32f100"
+#           - mcu:  stm32f101
+#             hal: "stm32f1xx"
+#             trg: "thumbv7m-none-eabi"
+#             brd: "none-stm32f101"
+           - mcu:  stm32f103
+             hal: "stm32f1xx"
+             trg: "thumbv7m-none-eabi"
+             brd: "generic-bare-metal"
+           - mcu:  stm32f303xc
+             hal: "stm32f3xx"
+             trg: "thumbv7em-none-eabihf"
+             brd: "generic-bare-metal"
+#           - mcu:  stm32f401
+#             hal: "stm32f4xx"
+#             trg: "thumbv7em-none-eabihf"
+#             brd: "blackpill-stm32f401"
+#           - mcu:  stm32f411
+#             hal: "stm32f4xx"
+#             trg: "thumbv7em-none-eabihf"
+#             brd: "blackpill-stm32f411"
+#           - mcu:  stm32f722
+#             hal: "stm32f7xx"
+#             trg: "thumbv7em-none-eabihf"
+#             brd: "none-stm32f722"
+#           - mcu:  stm32h742             
+#             hal: "stm32h7xx"
+#             trg: "thumbv7em-none-eabihf"
+#             brd: "none-stm32h742"
+#           - mcu:  stm32l072kztx
+#             hal: "stm32l0xx"
+#             trg: "thumbv6m-none-eabi"
+#             brd: "none-stm32l0x2"
+#           - mcu:  stm32l100
+#             hal: "stm32l1xx"
+#             trg: "thumbv7m-none-eabi"
+#             brd: "discovery-stm32l100"
+#           - mcu:  stm32l151
+#             hal: "stm32l1xx"
+#             trg: "thumbv7m-none-eabi"
+#             brd: "heltec-lora-node151"
+#           - mcu:  stm32l4x2
+#             hal: "stm32l4xx"
+#             trg: "thumbv7em-none-eabi"
+#             brd: "none-stm32l4x2"
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.TARGET }}
-          override: true
-
-      - name: Checkout CI scripts
-        uses: actions/checkout@v2
-        with:
-          repository: 'eldruin/rust-driver-ci-scripts'
-          ref: 'master'
-          path: 'ci'
-
-      - run: ../ci/patch-no-std.sh
-        working-directory: ${{ matrix.SUBFOLDER }}
-
-      - run: ../ci/patch-git-drivers.sh
-        working-directory: ${{ matrix.SUBFOLDER }}
-        if: contains(matrix.VERSION, 'git')
-
+          toolchain: stable
       - name: Build
-        working-directory: ${{ matrix.SUBFOLDER }}
-        run: cargo build --target=${{ matrix.TARGET }} --examples
+        #--manifest-path does cd, so Caro.toml is found in that directory.      
+        uses: actions-rs/cargo@v1 
+        with:
+          command: build
+          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.mcu }}
+          use-cross: true
+      - name: tree
+        uses: actions-rs/cargo@v1 
+        with:
+          command: tree
+          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml 
+      - name: Build example 
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
+          use-cross: true
+
 
 
   ci-rpi:
