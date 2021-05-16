@@ -102,14 +102,15 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        mcu: [stm32f103, stm32f303xc, ]
+        brd: [bluepill, discovery-stm32f303, blackpill-stm32f411 ]
+#        mcu: [stm32f103, stm32f303xc, ]
 #        mcu: [stm32f030xc, stm32f100, stm32f101, stm32f103, stm32f303xc, stm32f401, stm32f411, stm32f722,
 #              stm32h742, stm32l072kztx, stm32l100, stm32l151, stm32l4x2, ]
         
         eg:  [ad9833-midi-player-bp, ads1015-adc-display, bmi160-imu-display, ]
 
         include:
-           #- mcu:  stm32f042  NB commented out sections need mcu removed from mcu: or matrix is messed up
+           #- mcu:  stm32f042  NB commented out sections need brd removed from brd: or matrix is messed up
            #  hal: "stm32f0xx"
            #  trg: "thumbv6m-none-eabi"
            #  brd: "none-stm32f042"
@@ -125,22 +126,22 @@ jobs:
 #             hal: "stm32f1xx"
 #             trg: "thumbv7m-none-eabi"
 #             brd: "none-stm32f101"
-           - mcu:  stm32f103
+           - brd: "bluepill"
+             mcu:  stm32f103
              hal: "stm32f1xx"
              trg: "thumbv7m-none-eabi"
-             brd: "generic-bare-metal"
-           - mcu:  stm32f303xc
+           - brd: "discovery-stm32f303"
+             mcu:  stm32f303xc
              hal: "stm32f3xx"
              trg: "thumbv7em-none-eabihf"
-             brd: "generic-bare-metal"
 #           - mcu:  stm32f401
 #             hal: "stm32f4xx"
 #             trg: "thumbv7em-none-eabihf"
 #             brd: "blackpill-stm32f401"
-           - mcu:  stm32f411
+           - brd: "blackpill-stm32f411"
+             mcu:  stm32f411
              hal: "stm32f4xx"
              trg: "thumbv7em-none-eabihf"
-             brd: "blackpill-stm32f411"
 #           - mcu:  stm32f722
 #             hal: "stm32f7xx"
 #             trg: "thumbv7em-none-eabihf"
@@ -176,18 +177,18 @@ jobs:
         uses: actions-rs/cargo@v1 
         with:
           command: build
-          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.mcu }}
+          args:  --manifest-path generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.mcu }}
           use-cross: true
       - name: tree
         uses: actions-rs/cargo@v1 
         with:
           command: tree
-          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml 
+          args:  --manifest-path generic-bare-metal/Cargo.toml 
       - name: Build example 
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args:  --manifest-path ${{ matrix.brd }}/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
+          args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
           use-cross: true
 
 
