@@ -189,7 +189,8 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
+          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
+          #args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
           use-cross: true
 
   ci-rpi:

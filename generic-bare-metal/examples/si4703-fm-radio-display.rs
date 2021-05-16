@@ -1,70 +1,31 @@
-//! Measure the voltages with an ADS1015 analog/digital
-//! converter and print them to an SSD1306 OLED display.
+//! Seek an FM radio channel when pressing two buttons "Seek down" / "Seek up"
+//! using an Si4703 FM radio receiver (turner) and display the channel
+//! frequency in an SSD1306 OLED display.
 //!
-//! You can see further explanations about this device and how this example
-//! works here:
+//! Introductory blog post with some pictures here:
+//! https://blog.eldruin.com/si4703-fm-radio-receiver-driver-in-rust/
 //!
-//! https://blog.eldruin.com/ads1x1x-analog-to-digital-converter-driver-in-rust/
-//!
-//! This example is runs on the STM32F1 "BluePill" board using I2C1.
-//!
-//! ```
-//! BP  <-> ADS1015 <-> Display
-//! GND <-> GND     <-> GND
-//! +5V <-> +5V     <-> +5V
-//! PB9 <-> SDA     <-> SDA
-//! PB8 <-> SCL     <-> SCL
-//! ```
-//!
-//! For example you can create a simple voltage divider with resistors.
-//! The values do not matter much but it is nicer to understand if they are
-//! all the same as the voltage will be divided equally.
-//! I used 3 resistors of 20KOhm and the inputs of the ADC were connected
-//! as follows:
+//! This example is runs on the STM32F103 "Bluepill" board using I2C1.
 //!
 //! ```
-//!       ADS1015
-//! +5V <-> A0
-//!  |
-//!  R3
-//!  |  <-> A1
-//!  R2
-//!  |  <-> A2
-//!  R1
-//!  |
-//! GND <-> A3
+//! BP    <-> Si4703 <-> Display
+//! GND   <-> GND    <-> GND
+//! +3.3V <-> VCC    <-> VCC
+//! PB8   <-> SCLK   <-> SCL
+//! PB9   <-> SDIO   <-> SDA
+//! PB7   <-> RST
+//! PB6   <-> GPIO2
+//! PB10                        <-> Seek up button   <-> +3.3V
+//! PB11                        <-> Seek down button <-> +3.3V
 //! ```
-//!
-//! You can see an image of this [here](https://github.com/eldruin/driver-examples/blob/master/media/ads1015-voltage-divider.jpg).
-//!
-//! With this setup we should get the reading for +5V on channel A0,
-//! the reading for GND on channel A3 and A1 and A2 equally spaced in between
-//! (within resistence tolerances).
-//!
-//! I get these values:
-//! Channel 0: 1575
-//! Channel 1: 1051
-//! Channel 2: 524
-//! Channel 3: 0
-//!
-//! We can calculate the relations and voltage that correspond to each channel if we
-//! assume that 1575 corresponds to 5V.
-//!                         Factor        Voltage
-//! Channel 0: 1575 / 1575 = 1     * 5V =   5V
-//! Channel 1: 1051 / 1575 = 0.667 * 5V =  3.34V
-//! Channel 2: 524  / 1575 = 0.333 * 5V =  1.66V
-//! Channel 3: 0    / 1575 = 0     * 5V =   0V
-//!
-//! As you can see, the voltage was divided equally by all resistors.
 //!
 //! Run with:
-//! `cargo embed --example ads1015-adc-display-bp`,
+//! `cargo embed --example si4703-fm-radio-bp`,
 
 #![deny(unsafe_code)]
 #![no_std]
 #![no_main]
 
-use ads1x1x::{channel as AdcChannel, Ads1x1x, FullScaleRange, SlaveAddr};
 use core::fmt::Write;
 use cortex_m_rt::entry;
 use embedded_graphics::{
@@ -73,11 +34,15 @@ use embedded_graphics::{
     prelude::*,
     style::TextStyleBuilder,
 };
-use embedded_hal::digital::v2::OutputPin;
-use nb::block;
+use embedded_hal::digital::v2::{InputPin, OutputPin};
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
+use si4703::{
+    reset_and_select_i2c_method1 as reset_si4703, ChannelSpacing, DeEmphasis, ErrorWithPin,
+    SeekDirection, SeekMode, Si4703, Volume,
+};
 use ssd1306::{prelude::*, Builder, I2CDIBuilder};
+
 
 pub trait LED {
     // depending on board wiring, on may be set_high or set_low, with off also reversed
@@ -90,7 +55,7 @@ pub trait LED {
         self.on();
         delay.delay_ms(time);
         self.off();
-        delay.delay_ms(time);  /consider delay.delay_ms(500u16);
+        delay.delay_ms(time);  // consider delay.delay_ms(500u16); 
     }
 }
 
@@ -176,7 +141,7 @@ fn setup() -> (BlockingI2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
         (scl, sda),
         &mut afio.mapr,
         Mode::Fast {
-            frequency: 100_000.hz(),
+            frequency: 400_000.hz(),
             duty_cycle: DutyCycle::Ratio2to1,
         },
         clocks,
@@ -254,7 +219,7 @@ fn setup() -> (
     //    scl.internal_pull_up(&mut gpiob.pupdr, true);
     //    sda.internal_pull_up(&mut gpiob.pupdr, true);
 
-    let i2c = I2c::new(dp.I2C1, (scl, sda), 100_000.Hz(), clocks, &mut rcc.apb1);
+    let i2c = I2c::new(dp.I2C1, (scl, sda), 400_000.Hz(), clocks, &mut rcc.apb1);
 
     (i2c, led, delay)
 }
@@ -571,7 +536,13 @@ fn setup() -> (
 #[entry]
 fn main() -> ! {
     rtt_init_print!();
-    rprintln!("ADS1015 example");
+    rprintln!("Si4703 example");
+
+    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
+    let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
+    let seekdown = gpiob.pb11.into_pull_down_input(&mut gpiob.crh);
+    let seekup = gpiob.pb10.into_pull_down_input(&mut gpiob.crh);
+    reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
 
     let (i2c, mut led, mut delay) = setup();
 
@@ -579,44 +550,74 @@ fn main() -> ! {
     let interface = I2CDIBuilder::new().init(manager.acquire());
     let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
     disp.init().unwrap();
+    disp.flush().unwrap();
 
     let text_style = TextStyleBuilder::new(Font6x8)
         .text_color(BinaryColor::On)
         .build();
 
-    let mut adc = Ads1x1x::new_ads1015(manager.acquire(), SlaveAddr::default());
-    // need to be able to measure [0-5V]
-    adc.set_full_scale_range(FullScaleRange::Within6_144V)
-        .unwrap();
+    let mut radio = Si4703::new(manager.acquire());
+    radio.enable_oscillator().unwrap();
+    delay.delay_ms(500_u16);
+    radio.enable().unwrap();
+    delay.delay_ms(110_u16);
 
+    radio.set_volume(Volume::Dbfsm28).unwrap();
+    radio.set_deemphasis(DeEmphasis::Us50).unwrap();
+    radio.set_channel_spacing(ChannelSpacing::Khz100).unwrap();
+    radio.unmute().unwrap();
+
+    let mut buffer: heapless::String<64> = heapless::String::new();
     loop {
-        // Blink LED 0 to check that everything is actually running.
-        // If the LED 0 is off, something went wrong.
+        // Blink LED 0 every time a new seek is started
+        // to check that everything is actually running.
         led.blink(50_u16, &mut delay);
 
-        // Read voltage in all channels
-        let values = [
-            block!(adc.read(&mut AdcChannel::SingleA0)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA1)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA2)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA3)).unwrap_or(8091),
-        ];
+        let should_seek_down = seekdown.is_high().unwrap();
+        let should_seek_up = seekup.is_high().unwrap();
+        if should_seek_down || should_seek_up {
+            buffer.clear();
+            write!(buffer, "Seeking...").unwrap();
 
-        let mut lines: [heapless::String<32>; 4] = [
-            heapless::String::new(),
-            heapless::String::new(),
-            heapless::String::new(),
-            heapless::String::new(),
-        ];
-
-        disp.clear();
-        for i in 0..values.len() {
-            write!(lines[i], "Channel {}: {}", i, values[i]).unwrap();
-            Text::new(&lines[i], Point::new(0, i as i32 * 16))
+            disp.clear();
+            Text::new(&buffer, Point::zero())
                 .into_styled(text_style)
                 .draw(&mut disp)
                 .unwrap();
+
+            disp.flush().unwrap();
+            let direction = if should_seek_down {
+                SeekDirection::Down
+            } else {
+                SeekDirection::Up
+            };
+
+            buffer.clear();
+            loop {
+                match radio.seek_with_stc_int_pin(SeekMode::Wrap, direction, &stcint) {
+                    Err(nb::Error::WouldBlock) => {}
+                    Err(nb::Error::Other(ErrorWithPin::SeekFailed)) => {
+                        write!(buffer, "Seek Failed!  ").unwrap();
+                        break;
+                    }
+                    Err(_) => {
+                        write!(buffer, "Error!     ").unwrap();
+                        break;
+                    }
+                    Ok(_) => {
+                        let channel = radio.channel().unwrap_or(-1.0);
+                        write!(buffer, "Found {:1} MHz ", channel).unwrap();
+                        break;
+                    }
+                }
+            }
+            disp.clear();
+            Text::new(&buffer, Point::zero())
+                .into_styled(text_style)
+                .draw(&mut disp)
+                .unwrap();
+
+            disp.flush().unwrap();
         }
-        disp.flush().unwrap();
     }
 }
