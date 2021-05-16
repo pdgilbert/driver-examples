@@ -33,7 +33,6 @@ use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
 use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 
-
 pub trait LED {
     // depending on board wiring, on may be set_high or set_low, with off also reversed
     // implementation should deal with this difference
@@ -521,7 +520,6 @@ fn setup() -> (
 }
 
 // End of hal/MCU specific setup. Following should be generic code.
-
 
 #[entry]
 fn main() -> ! {

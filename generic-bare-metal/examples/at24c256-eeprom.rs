@@ -27,8 +27,6 @@ use embedded_hal::digital::v2::OutputPin;
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
 
-
-
 pub trait LED {
     // depending on board wiring, on may be set_high or set_low, with off also reversed
     // implementation should deal with this difference
