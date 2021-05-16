@@ -49,7 +49,6 @@ pub trait LED {
     }
 }
 
-
 // setup() does all  hal/MCU specific setup and returns generic hal device for use in main code.
 
 #[cfg(feature = "stm32f0xx")] //  eg stm32f030xc
@@ -98,16 +97,15 @@ fn setup() -> (
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
-
 
 #[cfg(feature = "stm32f1xx")]
 use stm32f1xx_hal::{
-    pac::{CorePeripherals, Peripherals, I2C1},
     delay::Delay,
     gpio::{gpioc::PC13, Output, PushPull},
     i2c::{BlockingI2c, DutyCycle, Mode, Pins},
+    pac::{CorePeripherals, Peripherals, I2C1},
     prelude::*,
 };
 
@@ -160,13 +158,12 @@ fn setup() -> (BlockingI2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
     (i2c, led, delay)
 }
 
-
 #[cfg(feature = "stm32f3xx")] //  eg Discovery-stm32f303
 use stm32f3xx_hal::{
-    pac::{CorePeripherals, Peripherals, I2C1},
     delay::Delay,
     gpio::{gpioe::PE9, Output, PushPull},
     i2c::{I2c, SclPin, SdaPin},
+    pac::{CorePeripherals, Peripherals, I2C1},
     prelude::*,
 };
 
@@ -201,10 +198,12 @@ fn setup() -> (
 
     let mut gpiob = dp.GPIOB.split(&mut rcc.ahb);
 
-    let scl = gpiob.pb6
-            .into_af4_open_drain(&mut gpiob.moder, &mut gpiob.otyper, &mut gpiob.afrl);
-    let sda = gpiob.pb7
-            .into_af4_open_drain(&mut gpiob.moder, &mut gpiob.otyper, &mut gpiob.afrl);
+    let scl = gpiob
+        .pb6
+        .into_af4_open_drain(&mut gpiob.moder, &mut gpiob.otyper, &mut gpiob.afrl);
+    let sda = gpiob
+        .pb7
+        .into_af4_open_drain(&mut gpiob.moder, &mut gpiob.otyper, &mut gpiob.afrl);
 
     //    // not sure if pull up is needed
     //    scl.internal_pull_up(&mut gpiob.pupdr, true);
@@ -212,7 +211,7 @@ fn setup() -> (
 
     let i2c = I2c::new(dp.I2C1, (scl, sda), 100_000.Hz(), clocks, &mut rcc.apb1);
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32f4xx")] // eg Nucleo-64  stm32f411
@@ -257,7 +256,7 @@ fn setup() -> (I2c<I2C2, impl Pins<I2C2>>, impl LED, Delay) {
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32f7xx")]
@@ -312,7 +311,7 @@ fn setup() -> (
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32h7xx")]
@@ -358,7 +357,7 @@ fn setup() -> (I2c<I2C1>, impl LED, Delay) {
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32l0xx")]
@@ -411,7 +410,7 @@ fn setup() -> (
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32l1xx")] // eg  Discovery STM32L100 and Heltec lora_node STM32L151CCU6
@@ -454,7 +453,7 @@ fn setup() -> (I2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 #[cfg(feature = "stm32l4xx")]
@@ -519,11 +518,10 @@ fn setup() -> (
         }
     }
 
-    (i2c, led, delay) 
+    (i2c, led, delay)
 }
 
 // End of hal/MCU specific setup. Following should be generic code.
-
 
 #[entry]
 fn main() -> ! {

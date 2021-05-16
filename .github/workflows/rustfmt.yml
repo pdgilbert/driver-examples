@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         SUBFOLDER:
+          - generic-bare-metal
           - stm32f3-discovery
           - stm32f1-bluepill
           - microbit

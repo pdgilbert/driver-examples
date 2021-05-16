@@ -25,7 +25,7 @@
 #![no_std]
 #![no_main]
 
-use ad983x::{Ad983x, FrequencyRegister, MODE, ad9833_ad9837::Ad9833Ad9837, SpiInterface};
+use ad983x::{ad9833_ad9837::Ad9833Ad9837, Ad983x, FrequencyRegister, SpiInterface, MODE};
 use cortex_m_rt::entry;
 use embedded_hal::digital::v2::OutputPin;
 use libm;
@@ -46,24 +46,42 @@ pub trait LED {
     }
 }
 
-
 //use stm32f1xx_hal::{delay::Delay, pac, prelude::*, spi::Spi};
 #[cfg(feature = "stm32f1xx")]
 use stm32f1xx_hal::{
-    pac::{CorePeripherals, Peripherals, SPI1, },
     delay::Delay,
+    gpio::{
+        gpioa::{PA4, PA5, PA6, PA7},
+        Alternate, Floating, Input,
+    },
     gpio::{gpioc::PC13, Output, PushPull},
-    gpio::{gpioa::{PA4, PA5, PA6, PA7}, Input, Floating, Alternate},
-    spi::{Error, Spi, Spi1NoRemap,},
+    pac::{CorePeripherals, Peripherals, SPI1},
     prelude::*,
+    spi::{Error, Spi, Spi1NoRemap},
 };
 
-// would like to use something like   fn setup() -> (impl Ad983x, impl LED, Delay) { 
+// would like to use something like   fn setup() -> (impl Ad983x, impl LED, Delay) {
 #[cfg(feature = "stm32f1xx")]
-fn setup() -> (Ad983x<SpiInterface<Spi<SPI1, Spi1NoRemap, 
-         (PA5<Alternate<PushPull>>, PA6<Input<Floating>>, PA7<Alternate<PushPull>>), u8>, 
-         PA4<Output<PushPull>>>, Ad9833Ad9837>,
-      impl LED, Delay) { 
+fn setup() -> (
+    Ad983x<
+        SpiInterface<
+            Spi<
+                SPI1,
+                Spi1NoRemap,
+                (
+                    PA5<Alternate<PushPull>>,
+                    PA6<Input<Floating>>,
+                    PA7<Alternate<PushPull>>,
+                ),
+                u8,
+            >,
+            PA4<Output<PushPull>>,
+        >,
+        Ad9833Ad9837,
+    >,
+    impl LED,
+    Delay,
+) {
     let cp = CorePeripherals::take().unwrap();
     let dp = Peripherals::take().unwrap();
 
