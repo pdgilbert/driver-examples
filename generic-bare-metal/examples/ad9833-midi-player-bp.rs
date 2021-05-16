@@ -25,20 +25,47 @@
 #![no_std]
 #![no_main]
 
-use ad983x::{Ad983x, FrequencyRegister, MODE};
+use ad983x::{Ad983x, FrequencyRegister, MODE, ad9833_ad9837::Ad9833Ad9837, SpiInterface};
 use cortex_m_rt::entry;
 use embedded_hal::digital::v2::OutputPin;
 use libm;
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
-use stm32f1xx_hal::{delay::Delay, pac, prelude::*, spi::Spi};
 
-#[entry]
-fn main() -> ! {
-    rtt_init_print!();
-    rprintln!("AD9833 example");
-    let cp = cortex_m::Peripherals::take().unwrap();
-    let dp = pac::Peripherals::take().unwrap();
+pub trait LED {
+    // depending on board wiring, on may be set_high or set_low, with off also reversed
+    // implementation should deal with this difference
+    fn on(&mut self) -> ();
+    fn off(&mut self) -> ();
+
+    // default methods
+    fn blink(&mut self, time: u16, delay: &mut Delay) -> () {
+        self.on();
+        delay.delay_ms(time);
+        self.off()
+    }
+}
+
+
+//use stm32f1xx_hal::{delay::Delay, pac, prelude::*, spi::Spi};
+#[cfg(feature = "stm32f1xx")]
+use stm32f1xx_hal::{
+    pac::{CorePeripherals, Peripherals, SPI1, },
+    delay::Delay,
+    gpio::{gpioc::PC13, Output, PushPull},
+    gpio::{gpioa::{PA4, PA5, PA6, PA7}, Input, Floating, Alternate},
+    spi::{Error, Spi, Spi1NoRemap,},
+    prelude::*,
+};
+
+// would like to use something like   fn setup() -> (impl Ad983x, impl LED, Delay) { 
+#[cfg(feature = "stm32f1xx")]
+fn setup() -> (Ad983x<SpiInterface<Spi<SPI1, Spi1NoRemap, 
+         (PA5<Alternate<PushPull>>, PA6<Input<Floating>>, PA7<Alternate<PushPull>>), u8>, 
+         PA4<Output<PushPull>>>, Ad9833Ad9837>,
+      impl LED, Delay) { 
+    let cp = CorePeripherals::take().unwrap();
+    let dp = Peripherals::take().unwrap();
 
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
@@ -68,9 +95,28 @@ fn main() -> ! {
     let mut gpioc = dp.GPIOC.split(&mut rcc.apb2);
     let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
-    cs.set_high().unwrap();
+    impl LED for PC13<Output<PushPull>> {
+        fn on(&mut self) -> () {
+            self.set_low().unwrap()
+        }
+        fn off(&mut self) -> () {
+            self.set_high().unwrap()
+        }
+    }
 
+    cs.set_high().unwrap();
     let mut synth = Ad983x::new_ad9833(spi, cs);
+
+    (synth, led, delay)
+}
+
+#[entry]
+fn main() -> ! {
+    rtt_init_print!();
+    rprintln!("AD9833 example");
+
+    let (synth, mut led, mut delay) = setup();
+
     synth.reset().unwrap();
     synth.enable().unwrap();
 
@@ -79,10 +125,7 @@ fn main() -> ! {
     loop {
         // Blink LED 0 to check that everything is actually running.
         // If the LED 0 does not blink, something went wrong.
-        led.set_high().unwrap();
-        delay.delay_ms(50_u16);
-        led.set_low().unwrap();
-        delay.delay_ms(25_u16);
+        led.blink(50_u16, &mut delay);
 
         let midi_number = table.next().unwrap_or(0);
         let midi_number = f64::from(midi_number);

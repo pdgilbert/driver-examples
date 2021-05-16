@@ -1,70 +1,27 @@
-//! Measure the voltages with an ADS1015 analog/digital
-//! converter and print them to an SSD1306 OLED display.
+//! Continuously read the accelerometer and gyroscope and print
+//! the data to an SSD1306 OLED display.
 //!
-//! You can see further explanations about this device and how this example
-//! works here:
-//!
-//! https://blog.eldruin.com/ads1x1x-analog-to-digital-converter-driver-in-rust/
-//!
-//! This example is runs on the STM32F1 "BluePill" board using I2C1.
+//! This example is runs on the STM32F103 "Bluepill" board using I2C1.
 //!
 //! ```
-//! BP  <-> ADS1015 <-> Display
-//! GND <-> GND     <-> GND
-//! +5V <-> +5V     <-> +5V
-//! PB9 <-> SDA     <-> SDA
-//! PB8 <-> SCL     <-> SCL
+//! BP   <-> BMI160 <-> Display
+//! GND  <-> GND    <-> GND
+//! 3.3V <-> VCC    <-> VDD
+//! PB8  <-> SCL    <-> SCL
+//! PB9  <-> SDA    <-> SDA
 //! ```
-//!
-//! For example you can create a simple voltage divider with resistors.
-//! The values do not matter much but it is nicer to understand if they are
-//! all the same as the voltage will be divided equally.
-//! I used 3 resistors of 20KOhm and the inputs of the ADC were connected
-//! as follows:
-//!
-//! ```
-//!       ADS1015
-//! +5V <-> A0
-//!  |
-//!  R3
-//!  |  <-> A1
-//!  R2
-//!  |  <-> A2
-//!  R1
-//!  |
-//! GND <-> A3
-//! ```
-//!
-//! You can see an image of this [here](https://github.com/eldruin/driver-examples/blob/master/media/ads1015-voltage-divider.jpg).
-//!
-//! With this setup we should get the reading for +5V on channel A0,
-//! the reading for GND on channel A3 and A1 and A2 equally spaced in between
-//! (within resistence tolerances).
-//!
-//! I get these values:
-//! Channel 0: 1575
-//! Channel 1: 1051
-//! Channel 2: 524
-//! Channel 3: 0
-//!
-//! We can calculate the relations and voltage that correspond to each channel if we
-//! assume that 1575 corresponds to 5V.
-//!                         Factor        Voltage
-//! Channel 0: 1575 / 1575 = 1     * 5V =   5V
-//! Channel 1: 1051 / 1575 = 0.667 * 5V =  3.34V
-//! Channel 2: 524  / 1575 = 0.333 * 5V =  1.66V
-//! Channel 3: 0    / 1575 = 0     * 5V =   0V
-//!
-//! As you can see, the voltage was divided equally by all resistors.
 //!
 //! Run with:
-//! `cargo embed --example ads1015-adc-display-bp`,
+//! `cargo embed --example bmi160-imu-display-bp`,
 
 #![deny(unsafe_code)]
 #![no_std]
 #![no_main]
 
-use ads1x1x::{channel as AdcChannel, Ads1x1x, FullScaleRange, SlaveAddr};
+use bmi160::{
+    AccelerometerPowerMode, Bmi160, Data, GyroscopePowerMode, Sensor3DData, SensorSelector,
+    SlaveAddr,
+};
 use core::fmt::Write;
 use cortex_m_rt::entry;
 use embedded_graphics::{
@@ -74,7 +31,6 @@ use embedded_graphics::{
     style::TextStyleBuilder,
 };
 use embedded_hal::digital::v2::OutputPin;
-use nb::block;
 use panic_rtt_target as _;
 use rtt_target::{rprintln, rtt_init_print};
 use ssd1306::{prelude::*, Builder, I2CDIBuilder};
@@ -203,6 +159,7 @@ fn setup() -> (BlockingI2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
 
     (i2c, led, delay)
 }
+
 
 #[cfg(feature = "stm32f3xx")] //  eg Discovery-stm32f303
 use stm32f3xx_hal::{
@@ -571,7 +528,7 @@ fn setup() -> (
 #[entry]
 fn main() -> ! {
     rtt_init_print!();
-    rprintln!("ADS1015 example");
+    rprintln!("BMI160 example");
 
     let (i2c, mut led, mut delay) = setup();
 
@@ -579,40 +536,48 @@ fn main() -> ! {
     let interface = I2CDIBuilder::new().init(manager.acquire());
     let mut disp: GraphicsMode<_> = Builder::new().connect(interface).into();
     disp.init().unwrap();
+    disp.flush().unwrap();
 
     let text_style = TextStyleBuilder::new(Font6x8)
         .text_color(BinaryColor::On)
         .build();
 
-    let mut adc = Ads1x1x::new_ads1015(manager.acquire(), SlaveAddr::default());
-    // need to be able to measure [0-5V]
-    adc.set_full_scale_range(FullScaleRange::Within6_144V)
+    let mut imu = Bmi160::new_with_i2c(manager.acquire(), SlaveAddr::Alternative(true));
+    imu.set_accel_power_mode(AccelerometerPowerMode::Normal)
         .unwrap();
+    imu.set_gyro_power_mode(GyroscopePowerMode::Normal).unwrap();
+
+    let mut lines: [heapless::String<32>; 2] = [heapless::String::new(), heapless::String::new()];
+    let default_3ddata = Sensor3DData {
+        x: -1,
+        y: -1,
+        z: -1,
+    };
+    let default_data = Data {
+        accel: Some(default_3ddata),
+        gyro: Some(default_3ddata),
+        magnet: None,
+        time: None,
+    };
 
     loop {
         // Blink LED 0 to check that everything is actually running.
         // If the LED 0 is off, something went wrong.
         led.blink(50_u16, &mut delay);
 
-        // Read voltage in all channels
-        let values = [
-            block!(adc.read(&mut AdcChannel::SingleA0)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA1)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA2)).unwrap_or(8091),
-            block!(adc.read(&mut AdcChannel::SingleA3)).unwrap_or(8091),
-        ];
+        let data = imu
+            .data(SensorSelector::new().accel().gyro())
+            .unwrap_or(default_data);
+        let accel = data.accel.unwrap();
+        let gyro = data.gyro.unwrap();
 
-        let mut lines: [heapless::String<32>; 4] = [
-            heapless::String::new(),
-            heapless::String::new(),
-            heapless::String::new(),
-            heapless::String::new(),
-        ];
-
+        lines[0].clear();
+        lines[1].clear();
+        write!(lines[0], "acc: x {} y {} z {}", accel.x, accel.y, accel.z).unwrap();
+        write!(lines[1], "gyr: x {} y {} z {}", gyro.x, gyro.y, gyro.z).unwrap();
         disp.clear();
-        for i in 0..values.len() {
-            write!(lines[i], "Channel {}: {}", i, values[i]).unwrap();
-            Text::new(&lines[i], Point::new(0, i as i32 * 16))
+        for (i, line) in lines.iter().enumerate() {
+            Text::new(line, Point::new(0, i as i32 * 16))
                 .into_styled(text_style)
                 .draw(&mut disp)
                 .unwrap();
