@@ -173,26 +173,24 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-      - name: Build
-        #--manifest-path does cd, so Caro.toml is found in that directory.      
-        uses: actions-rs/cargo@v1 
-        with:
-          command: build
-          args:  --manifest-path generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.mcu }}
-          use-cross: true
       - name: tree
+        #--manifest-path to find Caro.toml.      
         uses: actions-rs/cargo@v1 
         with:
           command: tree
           args:  --manifest-path generic-bare-metal/Cargo.toml 
+      #- name: Build
+      #  uses: actions-rs/cargo@v1 
+      #  with:
+      #    command: build
+      #    args:  --manifest-path generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }}
+      #    use-cross: true
       - name: Build example 
         uses: actions-rs/cargo@v1
         with:
           command: build
           args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
           use-cross: true
-
-
 
   ci-rpi:
     runs-on: ubuntu-latest
