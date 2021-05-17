@@ -119,10 +119,10 @@ jobs:
            #  hal: "stm32f0xx"
            #  trg: "thumbv6m-none-eabi"
            #  brd: "none-stm32f042"
-#           - mcu:  stm32f030xc
-#             hal: "stm32f0xx"
-#             trg: "thumbv6m-none-eabi"   
-#             brd: "none-stm32f030"
+            - brd: "none-stm32f030"
+              mcu:  stm32f030xc
+              hal: "stm32f0xx"
+              trg: "thumbv6m-none-eabi"   
 #           - mcu:  stm32f100
 #             hal: "stm32f1xx"
 #             trg: "thumbv7m-none-eabi"

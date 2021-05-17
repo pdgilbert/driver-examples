@@ -250,6 +250,7 @@ fn setup() -> (
     let i2c = I2c::new(dp.I2C1, (scl, sda), 400_000.Hz(), clocks, &mut rcc.apb1);
 
     let mut gpioa = dp.GPIOA.split(&mut rcc.ahb);
+
     let (tx, rx) = Serial::usart1(
         dp.USART1,
         (
@@ -301,7 +302,7 @@ fn setup() -> (
     let scl = gpiob.pb10.into_alternate_af4().set_open_drain(); // scl on PB10
     let sda = gpiob.pb3.into_alternate_af9().set_open_drain(); // sda on PB3
 
-    let i2c = I2c::new(p.I2C2, (scl, sda), 400.khz(), clocks);
+    let i2c = I2c::new(dp.I2C2, (scl, sda), 400.khz(), clocks);
 
     let delay = Delay::new(cp.SYST, clocks);
 
@@ -317,6 +318,8 @@ fn setup() -> (
             self.set_high().unwrap()
         }
     }
+
+    let gpioa = dp.GPIOA.split();
 
     dp.USART1.cr1.modify(|_, w| w.rxneie().set_bit()); //need RX interrupt?
     let (tx, rx) = Serial::usart1(

@@ -41,6 +41,7 @@ use si4703::{
     reset_and_select_i2c_method1 as reset_si4703, ChannelSpacing, DeEmphasis, ErrorWithPin,
     SeekDirection, SeekMode, Si4703, Volume,
 };
+
 use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 
 pub trait LED {
@@ -112,14 +113,26 @@ fn setup() -> (
 #[cfg(feature = "stm32f1xx")]
 use stm32f1xx_hal::{
     delay::Delay,
-    gpio::{gpioc::PC13, Output, PushPull},
+    gpio::{
+        gpiob::{PB10, PB11, PB6},
+        gpioc::PC13,
+        Input, Output, PullDown, PullUp, PushPull,
+    },
     i2c::{BlockingI2c, DutyCycle, Mode, Pins},
     pac::{CorePeripherals, Peripherals, I2C1},
     prelude::*,
 };
 
 #[cfg(feature = "stm32f1xx")]
-fn setup() -> (BlockingI2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
+fn setup() -> (
+    BlockingI2c<I2C1, impl Pins<I2C1>>,
+    impl LED,
+    Delay,
+    impl Si4703,
+    PB6<Input<PullUp>>,
+    PB11<Input<PullDown>>,
+    PB10<Input<PullDown>>,
+) {
     let cp = CorePeripherals::take().unwrap();
     let dp = Peripherals::take().unwrap();
 
@@ -164,7 +177,13 @@ fn setup() -> (BlockingI2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
         }
     }
 
-    (i2c, led, delay)
+    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
+    let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
+    let seekdown = gpiob.pb11.into_pull_down_input(&mut gpiob.crh);
+    let seekup = gpiob.pb10.into_pull_down_input(&mut gpiob.crh);
+    let Si4703 = reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
+
+    (i2c, led, delay, Si4703, stcint, seekdown, seekup)
 }
 
 #[cfg(feature = "stm32f3xx")] //  eg Discovery-stm32f303
@@ -537,13 +556,7 @@ fn main() -> ! {
     rtt_init_print!();
     rprintln!("Si4703 example");
 
-    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
-    let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
-    let seekdown = gpiob.pb11.into_pull_down_input(&mut gpiob.crh);
-    let seekup = gpiob.pb10.into_pull_down_input(&mut gpiob.crh);
-    reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
-
-    let (i2c, mut led, mut delay) = setup();
+    let (i2c, mut led, mut delay, mut Si4703, mut stcint, mut seekdown, mut seekup) = setup();
 
     let manager = shared_bus::BusManager::<cortex_m::interrupt::Mutex<_>, _>::new(i2c);
     let interface = I2CDIBuilder::new().init(manager.acquire());
