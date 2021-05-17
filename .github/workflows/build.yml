@@ -103,8 +103,8 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        brd: [none-stm32f100, none-stm32f101, bluepill, discovery-stm32f303, blackpill-stm32f401, blackpill-stm32f411, 
-              none-stm32f722, none-stm32h742, none-stm32l0x2, 
+        brd: [none-stm32f100, none-stm32f101, bluepill,       discovery-stm32f303, blackpill-stm32f401, blackpill-stm32f411, 
+              none-stm32f722, none-stm32h742, none-stm32l0x2, discovery-stm32l100, heltec-lora-node151, none-stm32l4x2,
               ]
               #none-stm32f042, none-stm32f030, 
         

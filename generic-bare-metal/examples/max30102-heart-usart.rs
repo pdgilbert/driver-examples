@@ -367,9 +367,8 @@ fn setup() -> (
     let sda = gpiob.pb9.into_alternate_af4().set_open_drain(); // sda on PB9
 
     let i2c = BlockingI2c::i2c1(
-        p.I2C1,
+        dp.I2C1,
         (scl, sda),
-        //400.khz(),
         Mode::Fast {
             frequency: 400_000.hz(),
         },
@@ -395,7 +394,7 @@ fn setup() -> (
     let gpioa = dp.GPIOA.split();
 
     let (tx, rx) = Serial::new(
-        p.USART1,
+        dp.USART1,
         (
             gpioa.pa9.into_alternate_af7(),
             gpioa.pa10.into_alternate_af7(),
@@ -429,7 +428,7 @@ fn setup() -> (I2c<I2C1>, impl LED, Delay, Tx<USART1>, Rx<USART1>) {
     let pwr = dp.PWR.constrain();
     let vos = pwr.freeze();
     let rcc = dp.RCC.constrain();
-    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &p.SYSCFG);
+    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &dp.SYSCFG);
     let clocks = ccdr.clocks;
 
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
