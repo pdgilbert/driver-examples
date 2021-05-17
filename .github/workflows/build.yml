@@ -173,6 +173,11 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+          target: ${{ matrix.trg }}
+      - name: show targets
+        uses: actions-rs/rustup@v1 
+        with:
+          command: show
       - name: tree
         #--manifest-path to find Caro.toml.      
         uses: actions-rs/cargo@v1 
@@ -185,12 +190,12 @@ jobs:
       #    command: build
       #    args:  --manifest-path generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }}
       #    use-cross: true
+          #args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
       - name: Build example 
         uses: actions-rs/cargo@v1
         with:
           command: build
           args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
-          #args:  --manifest-path  generic-bare-metal/Cargo.toml --no-default-features --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ${{ matrix.eg }}
           use-cross: true
 
   ci-rpi:
