@@ -103,12 +103,13 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        brd: [bluepill, discovery-stm32f303, blackpill-stm32f411 ]
+        brd: [bluepill, discovery-stm32f303, blackpill-stm32f411, none-stm32f722]
 #        mcu: [stm32f103, stm32f303xc, ]
 #        mcu: [stm32f030xc, stm32f100, stm32f101, stm32f103, stm32f303xc, stm32f401, stm32f411, stm32f722,
 #              stm32h742, stm32l072kztx, stm32l100, stm32l151, stm32l4x2, ]
         
-        eg:  [ad9833-midi-player-bp, ads1015-adc-display, bmi160-imu-display, ]
+        eg:  [ad9833-midi-player-bp, ads1015-adc-display, at24c256-eeprom, bmi160-imu-display, ccs811-gas-voc-display,
+              ccs811-gas-voc-hdc2080-display, ds1307-rtc,  hdc2080-temp-humidity-display, iaq-core-c-gas-voc-display, ]
 
         include:
            #- mcu:  stm32f042  NB commented out sections need brd removed from brd: or matrix is messed up
@@ -143,10 +144,10 @@ jobs:
              mcu:  stm32f411
              hal: "stm32f4xx"
              trg: "thumbv7em-none-eabihf"
-#           - mcu:  stm32f722
-#             hal: "stm32f7xx"
-#             trg: "thumbv7em-none-eabihf"
-#             brd: "none-stm32f722"
+           - brd: "none-stm32f722"
+             mcu:  stm32f722
+             hal: "stm32f7xx"
+             trg: "thumbv7em-none-eabihf"
 #           - mcu:  stm32h742             
 #             hal: "stm32h7xx"
 #             trg: "thumbv7em-none-eabihf"
