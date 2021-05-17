@@ -33,7 +33,6 @@ use ssd1306::{prelude::*, Builder, I2CDIBuilder};
 
 use tcs3472::{AllChannelMeasurement, Tcs3472};
 
-
 pub trait LED {
     // depending on board wiring, on may be set_high or set_low, with off also reversed
     // implementation should deal with this difference
@@ -45,7 +44,7 @@ pub trait LED {
         self.on();
         delay.delay_ms(time);
         self.off();
-        delay.delay_ms(time);  // consider delay.delay_ms(500u16); 
+        delay.delay_ms(time); // consider delay.delay_ms(500u16);
     }
 }
 
