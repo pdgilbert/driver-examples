@@ -99,3 +99,115 @@ stm32l151 = ["stm32l1xx-hal/stm32l151", "stm32l1xx-hal/rt"]
 stm32l4x1 = ["stm32l4xx-hal/stm32l4x1", "stm32l4xx-hal/rt"]
 stm32l4x2 = ["stm32l4xx-hal/stm32l4x2", "stm32l4xx-hal/rt"]
 stm32l4x6 = ["stm32l4xx-hal/stm32l4x6", "stm32l4xx-hal/rt"]
+
+[[example]]
+name = "ad9833-midi-player-bp"
+path = "examples/ad9833-midi-player-bp.rs"
+
+[[example]]
+name = "ads1015-adc-display"
+path = "examples/ads1015-adc-display.rs"
+
+[[example]]
+name = "at24c256-eeprom"
+path = "examples/at24c256-eeprom.rs"
+
+[[example]]
+name = "bmi160-imu-display"
+path = "examples/bmi160-imu-display.rs"
+
+[[example]]
+name = "ccs811-gas-voc-display"
+path = "examples/ccs811-gas-voc-display.rs"
+
+[[example]]
+name = "ccs811-gas-voc-hdc2080-display"
+path = "examples/ccs811-gas-voc-hdc2080-display.rs"
+
+[[example]]
+name = "ds1307-rtc"
+path = "examples/ds1307-rtc.rs"
+
+[[example]]
+name = "hdc2080-temp-humidity-display"
+path = "examples/hdc2080-temp-humidity-display.rs"
+
+[[example]]
+name = "iaq-core-c-gas-voc-display"
+path = "examples/iaq-core-c-gas-voc-display.rs"
+
+[[example]]
+name = "isl29125-color-display"
+path = "examples/isl29125-color-display.rs"
+
+[[example]]
+name = "max17043-battery-monitor-display"
+path = "examples/max17043-battery-monitor-display.rs"
+
+[[example]]
+name = "max30102-heart-usart"
+path = "examples/max30102-heart-usart.rs"
+
+[[example]]
+name = "mcp7940n-rtc-display"
+path = "examples/mcp7940n-rtc-display.rs"
+
+[[example]]
+name = "mlx90614-temperature-display"
+path = "examples/mlx90614-temperature-display.rs"
+
+[[example]]
+name = "mlx90615-temperature-display"
+path = "examples/mlx90615-temperature-display.rs"
+
+[[example]]
+name = "mma8452-accel-display"
+path = "examples/mma8452-accel-display.rs"
+
+[[example]]
+name = "opt3001-als-display"
+path = "examples/opt3001-als-display.rs"
+
+[[example]]
+name = "pca9685-pwm-rgb-led-servos"
+path = "examples/pca9685-pwm-rgb-led-servos.rs"
+
+[[example]]
+name = "si4703-fm-radio-display"
+path = "examples/si4703-fm-radio-display.rs"
+
+[[example]]
+name = "si4703-fm-radio"
+path = "examples/si4703-fm-radio.rs"
+
+[[example]]
+name = "tcs34725-color-display"
+path = "examples/tcs34725-color-display.rs"
+
+[[example]]
+name = "tmp006-ir-temp-display"
+path = "examples/tmp006-ir-temp-display.rs"
+
+[[example]]
+name = "tmp102-temp-display"
+path = "examples/tmp102-temp-display.rs"
+
+[[example]]
+name = "veml6030-als-display"
+path = "examples/veml6030-als-display.rs"
+
+[[example]]
+name = "veml6070-uv-display"
+path = "examples/veml6070-uv-display.rs"
+
+[[example]]
+name = "veml6075-uv-display"
+path = "examples/veml6075-uv-display.rs"
+
+#[[example]]
+#name = "ccs811-gas-voc-usart-logger"
+#path = "examples/ccs811-gas-voc-usart-logger-bp.rs"
+#
+#[[example]]
+#name = "iaq-core-c-gas-voc-usart-logger"
+#path = "examples/iaq-core-c-gas-voc-usart-logger.rs"
