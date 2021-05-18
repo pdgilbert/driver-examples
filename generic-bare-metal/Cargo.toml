@@ -9,29 +9,53 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-ad983x = "0.2"
-ads1x1x = "0.2"
-bmi160 = "0.1"
-ds1307 = "0.3"
-eeprom24x = "0.3"
-embedded-ccs811 = "0.2"
-hdc20xx = "0.1"
-iaq-core = "0.1"
-isl29125 = "0.1"
-max170xx = "0.1"
-max3010x = "0.1"
-mcp794xx = "0.2"
-mlx9061x = "0.1"
-mma8x5x = "0.1"
-opt300x = "0.1"
-pwm-pca9685 = "0.3"
-si4703 = "0.1"
-tcs3472 = "0.2"
-tmp006 = "0.1"
-tmp1x2 = "0.2"
-veml6030 = "0.1"
-veml6070 = "0.1"
-veml6075 = "0.2"
+ad983x          = { git = "https://github.com/eldruin/ad983x-rs" }
+ads1x1x         = { git = "https://github.com/eldruin/ads1x1x-rs" }
+bmi160          = { git = "https://github.com/eldruin/bmi160-rs" }
+ds1307          = { git = "https://github.com/eldruin/ds1307-rs" }
+eeprom24x       = { git = "https://github.com/eldruin/eeprom24x-rs" }
+embedded-ccs811 = { git = "https://github.com/eldruin/embedded-ccs811-rs" }
+hdc20xx         = { git = "https://github.com/eldruin/hdc20xx-rs" }
+iaq-core        = { git = "https://github.com/eldruin/iaq-core-rs" }
+isl29125        = { git = "https://github.com/eldruin/isl29125-rs" }
+max170xx        = { git = "https://github.com/eldruin/max170xx-rs" }
+max3010x        = { git = "https://github.com/eldruin/max3010x-rs" }
+mcp794xx        = { git = "https://github.com/eldruin/mcp794xx-rs" }
+mlx9061x        = { git = "https://github.com/eldruin/mlx9061x-rs" }
+mma8x5x         = { git = "https://github.com/eldruin/mma8x5x-rs" }
+opt300x         = { git = "https://github.com/eldruin/opt300x-rs" }
+pwm-pca9685     = { git = "https://github.com/eldruin/pwm-pca9685-rs" }
+si4703          = { git = "https://github.com/eldruin/si4703-rs" }
+tcs3472         = { git = "https://github.com/eldruin/tcs3472-rs" }
+tmp006          = { git = "https://github.com/eldruin/tmp006-rs" }
+tmp1x2          = { git = "https://github.com/eldruin/tmp1x2-rs" }
+veml6030        = { git = "https://github.com/eldruin/veml6030-rs" }
+veml6070        = { git = "https://github.com/eldruin/veml6070-rs" }
+veml6075        = { git = "https://github.com/eldruin/veml6075-rs" }
+
+#ad983x = "0.2"
+#ads1x1x = "0.2"
+#bmi160 = "0.1"
+#ds1307 = "0.3"
+#eeprom24x = "0.3"
+#embedded-ccs811 = "0.2"
+#hdc20xx = "0.1"
+#iaq-core = "0.1"
+#isl29125 = "0.1"
+#max170xx = "0.1"
+#max3010x = "0.1"
+#mcp794xx = "0.2"
+#mlx9061x = "0.1"
+#mma8x5x = "0.1"
+#opt300x = "0.1"
+#pwm-pca9685 = "0.3"
+#si4703 = "0.1"
+#tcs3472 = "0.2"
+#tmp006 = "0.1"
+#tmp1x2 = "0.2"
+#veml6030 = "0.1"
+#veml6070 = "0.1"
+#veml6075 = "0.2"
 
 ssd1306 = "0.4"
 embedded-graphics = "0.6"

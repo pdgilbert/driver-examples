@@ -550,9 +550,9 @@ use stm32l1xx_hal::{
     i2c::{I2c, Pins},
     prelude::*,
     rcc, // for ::Config but avoid name conflict with serial
-    stm32::{CorePeripherals, Peripherals, I2C1, USART1},
     serial::{Config, Rx, SerialExt, Tx},
     //gpio::{gpiob::{PB8, PB9}, Output, OpenDrain, },
+    stm32::{CorePeripherals, Peripherals, I2C1, USART1},
 };
 
 #[cfg(feature = "stm32l1xx")]
