@@ -551,6 +551,7 @@ use stm32l1xx_hal::{
     prelude::*,
     rcc, // for ::Config but avoid name conflict with serial
     stm32::{CorePeripherals, Peripherals, I2C1, USART1},
+    serial::{Config, Rx, SerialExt, Tx},
     //gpio::{gpiob::{PB8, PB9}, Output, OpenDrain, },
 };
 
@@ -650,7 +651,7 @@ fn setup() -> (
     sda.internal_pull_up(&mut gpiob.pupdr, true);
     let sda = sda.into_af4(&mut gpiob.moder, &mut gpiob.afrh);
 
-    let i2c = I2c::i2c2(p.I2C2, (scl, sda), 400.khz(), clocks, &mut rcc.apb1r1);
+    let i2c = I2c::i2c2(dp.I2C2, (scl, sda), 400.khz(), clocks, &mut rcc.apb1r1);
 
     let mut gpioc = dp.GPIOC.split(&mut rcc.ahb2);
 

@@ -9,38 +9,38 @@ name: Build
 
 env:
   CARGO_TERM_COLOR: always
-#  RUSTFLAGS: '-D warnings'
-#  DRIVERS: >
-#    ad983x
-#    ads1x1x
-#    apds9960
-#    bmi160
-#    ds1307
-#    ds323x
-#    eeprom24x
-#    embedded-ccs811
-#    hdc20xx
-#    isl29125
-#    kxcj9
-#    lm75
-#    lsm303agr
-#    max170xx
-#    max3010x
-#    max44009
-#    mcp4x
-#    mcp49xx
-#    mcp794xx
-#    mlx9061x
-#    mma8x5x
-#    opt300x
-#    pcf857x
-#    pwm-pca9685
-#    tcs3472
-#    tmp006
-#    tmp1x2
-#    veml6030
-#    veml6075
-#    xca9548a
+  RUSTFLAGS: '-D warnings'
+  DRIVERS: >
+    ad983x
+    ads1x1x
+    apds9960
+    bmi160
+    ds1307
+    ds323x
+    eeprom24x
+    embedded-ccs811
+    hdc20xx
+    isl29125
+    kxcj9
+    lm75
+    lsm303agr
+    max170xx
+    max3010x
+    max44009
+    mcp4x
+    mcp49xx
+    mcp794xx
+    mlx9061x
+    mma8x5x
+    opt300x
+    pcf857x
+    pwm-pca9685
+    tcs3472
+    tmp006
+    tmp1x2
+    veml6030
+    veml6075
+    xca9548a
 
 # veml6040 Git version is not compatible. Deactivated until a new version is released.
 # veml6070 Git version is not compatible. Deactivated until a new version is released.
