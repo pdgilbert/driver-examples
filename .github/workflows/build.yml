@@ -116,9 +116,9 @@ jobs:
               mma8452-accel-display,   opt3001-als-display,              pca9685-pwm-rgb-led-servos, 
               si4703-fm-radio-display, si4703-fm-radio,                  tcs34725-color-display,
               tmp006-ir-temp-display,  tmp102-temp-display,              veml6030-als-display, 
-              veml6070-uv-display,     veml6075-uv-display ]
+              veml6075-uv-display ]
 
-              #ccs811-gas-voc-usart-logger-bp.rs, iaq-core-c-gas-voc-usart-logger-bp
+              #veml6070-uv-display, ccs811-gas-voc-usart-logger-bp.rs, iaq-core-c-gas-voc-usart-logger-bp
 
         include:
            #- brd: "none-stm32f042"  NB commented out sections need brd removed from brd: or matrix is messed up
