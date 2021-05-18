@@ -1,7 +1,8 @@
 # Additional example programs for several rust drivers
 
-These examples use ... board. At the beginning of each example the setup
-and behavior is described. Many of them also use an SSD1306 OLED display.
+These examples build on several board and with various device HALs. 
+At the beginning of each example the setup and behavior is described. 
+Many of them also use an SSD1306 OLED display.
 You can buy  most of the modules used here on [AliExpress] generally for a very small price.
 
 For example, to run the veml6070 example:
