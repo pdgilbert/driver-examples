@@ -186,13 +186,13 @@ jobs:
           toolchain: stable
           target: ${{ matrix.trg }}
     
-    - name: Configure caching 
-      uses: actions/cache@v2
-      with:
-        key: ${{ matrix.brd }}
-        path: |
-          ${{ env.HOME }}/.cargo"
-          target
+      - name: Configure caching 
+        uses: actions/cache@v2
+        with:
+          key: ${{ matrix.brd }}
+          path: |
+            ${{ env.HOME }}/.cargo
+            target
 
       - name: tree
         #--manifest-path to find Caro.toml.      
