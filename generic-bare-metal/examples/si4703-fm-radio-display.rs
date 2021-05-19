@@ -59,6 +59,18 @@ pub trait LED {
     }
 }
 
+pub struct SeekPins<T, U> {
+    p_seekup:   T,
+    p_seekdown: U,
+    //p_stcint:   V,
+}
+
+pub trait SEEK {
+    fn seekup(&mut self)   -> bool;
+    fn seekdown(&mut self) -> bool;
+    //fn stcint(&mut self) -> ;
+}
+
 // setup() does all  hal/MCU specific setup and returns generic hal device for use in main code.
 
 #[cfg(feature = "stm32f0xx")] //  eg stm32f030xc
@@ -128,10 +140,8 @@ fn setup() -> (
     BlockingI2c<I2C1, impl Pins<I2C1>>,
     impl LED,
     Delay,
-    impl Si4703,
+    impl SEEK,
     PB6<Input<PullUp>>,
-    PB11<Input<PullDown>>,
-    PB10<Input<PullDown>>,
 ) {
     let cp = CorePeripherals::take().unwrap();
     let dp = Peripherals::take().unwrap();
@@ -147,6 +157,7 @@ fn setup() -> (
 
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
+    //let sda = gpiob.pb9.into_push_pull_output(&mut gpiob.crh);
 
     let i2c = BlockingI2c::i2c1(
         dp.I2C1,
@@ -177,13 +188,27 @@ fn setup() -> (
         }
     }
 
-    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
-    let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
-    let seekdown = gpiob.pb11.into_pull_down_input(&mut gpiob.crh);
-    let seekup = gpiob.pb10.into_pull_down_input(&mut gpiob.crh);
-    let Si4703 = reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
+    let stcint   = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
 
-    (i2c, led, delay, Si4703, stcint, seekdown, seekup)
+    let buttons: SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> = SeekPins{
+        p_seekup   : gpiob.pb10.into_pull_down_input(&mut gpiob.crh), 
+        p_seekdown : gpiob.pb11.into_pull_down_input(&mut gpiob.crh)
+    };
+    
+    impl  SEEK for SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> {
+        fn seekup(&mut self) -> bool {
+            self.p_seekup.is_high().unwrap()
+        }
+        fn seekdown(&mut self) -> bool {
+            self.p_seekdown.is_high().unwrap()
+        }
+    }
+
+    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
+    //let z = reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
+    let z = reset_si4703(&mut rst, &mut sda, &mut delay);
+
+    (i2c, led, delay, buttons, stcint)
 }
 
 #[cfg(feature = "stm32f3xx")] //  eg Discovery-stm32f303
@@ -556,7 +581,7 @@ fn main() -> ! {
     rtt_init_print!();
     rprintln!("Si4703 example");
 
-    let (i2c, mut led, mut delay, mut Si4703, mut stcint, mut seekdown, mut seekup) = setup();
+    let (i2c, mut led, mut delay, mut buttons, mut stcint) = setup();
 
     let manager = shared_bus::BusManager::<cortex_m::interrupt::Mutex<_>, _>::new(i2c);
     let interface = I2CDIBuilder::new().init(manager.acquire());
@@ -585,8 +610,8 @@ fn main() -> ! {
         // to check that everything is actually running.
         led.blink(50_u16, &mut delay);
 
-        let should_seek_down = seekdown.is_high().unwrap();
-        let should_seek_up = seekup.is_high().unwrap();
+        let should_seek_down = buttons.seekdown();
+        let should_seek_up   = buttons.seekup();
         if should_seek_down || should_seek_up {
             buffer.clear();
             write!(buffer, "Seeking...").unwrap();
