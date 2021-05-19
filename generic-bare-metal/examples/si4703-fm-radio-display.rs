@@ -60,13 +60,13 @@ pub trait LED {
 }
 
 pub struct SeekPins<T, U> {
-    p_seekup:   T,
+    p_seekup: T,
     p_seekdown: U,
     //p_stcint:   V,
 }
 
 pub trait SEEK {
-    fn seekup(&mut self)   -> bool;
+    fn seekup(&mut self) -> bool;
     fn seekdown(&mut self) -> bool;
     //fn stcint(&mut self) -> ;
 }
@@ -188,14 +188,14 @@ fn setup() -> (
         }
     }
 
-    let stcint   = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
+    let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
 
-    let buttons: SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> = SeekPins{
-        p_seekup   : gpiob.pb10.into_pull_down_input(&mut gpiob.crh), 
-        p_seekdown : gpiob.pb11.into_pull_down_input(&mut gpiob.crh)
+    let buttons: SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> = SeekPins {
+        p_seekup: gpiob.pb10.into_pull_down_input(&mut gpiob.crh),
+        p_seekdown: gpiob.pb11.into_pull_down_input(&mut gpiob.crh),
     };
-    
-    impl  SEEK for SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> {
+
+    impl SEEK for SeekPins<PB10<Input<PullDown>>, PB11<Input<PullDown>>> {
         fn seekup(&mut self) -> bool {
             self.p_seekup.is_high().unwrap()
         }
@@ -611,7 +611,7 @@ fn main() -> ! {
         led.blink(50_u16, &mut delay);
 
         let should_seek_down = buttons.seekdown();
-        let should_seek_up   = buttons.seekup();
+        let should_seek_up = buttons.seekup();
         if should_seek_down || should_seek_up {
             buffer.clear();
             write!(buffer, "Seeking...").unwrap();
