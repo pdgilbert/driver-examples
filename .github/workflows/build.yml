@@ -103,7 +103,7 @@ jobs:
 # Further below generic-bare-metal2 uses a job for each brd and a job step for each example.
 # It is faster but an example failure stops the job. Details are all in the artifact, which are a bit harder to review.
   generic-bare-metal:
-    name: eg
+    name: brd x eg
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
@@ -222,7 +222,7 @@ jobs:
           use-cross: true
 
   generic-bare-metal2:
-    name: eg
+    name: boards
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
@@ -473,23 +473,47 @@ jobs:
           args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example iaq-core-c-gas-voc-display
           use-cross: true
 
-         #[ad9833-midi-player-bp,
-         #veml6070-uv-display, ccs811-gas-voc-usart-logger-bp.rs, iaq-core-c-gas-voc-usart-logger-bp
-
-      - name: Example si4703-fm-radio-display
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example si4703-fm-radio-display
-          use-cross: true
-
-      - name: Example si4703-fm-radio
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example si4703-fm-radio
-          use-cross: true
-
+#      - name: Example si4703-fm-radio-display
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example si4703-fm-radio-display
+#          use-cross: true
+#
+#      - name: Example si4703-fm-radio
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example si4703-fm-radio
+#          use-cross: true
+#
+#      - name: Example ad9833-midi-player-bp
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ad9833-midi-player-bp
+#          use-cross: true
+#
+#      - name: Example veml6070-uv-display
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example veml6070-uv-display
+#          use-cross: true
+#
+#      - name: Example ccs811-gas-voc-usart-logger-bp
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example ccs811-gas-voc-usart-logger-bp
+#          use-cross: true
+#
+#      - name: Example iaq-core-c-gas-voc-usart-logger-bp
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: build
+#          args:  --manifest-path  generic-bare-metal/Cargo.toml  --release --target ${{ matrix.trg }} --features ${{ matrix.hal }},${{ matrix.mcu }} --example iaq-core-c-gas-voc-usart-logger-bp
+#          use-cross: true
 
   ci-rpi:
     runs-on: ubuntu-latest
