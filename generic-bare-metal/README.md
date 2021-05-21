@@ -17,11 +17,10 @@ cargo install cargo-embed
 Then on another terminal run:
 ```
 git clone https://github.com/eldruin/driver-examples
-cd driver-examples/stm32f1-bluepill
-cargo embed --example veml6070-uv-display-bp
+cd driver-examples/generic-bare-metal
 ```
 
-More generally, set one of these lines
+Set one of these lines
 ```
               cargo run  environment variables                        openocd         embed        test board and processor
   _____________________________________________________________     _____________  _____________   ___________________________
@@ -47,6 +46,10 @@ cargo build --no-default-features --target $TARGET --features $MCU,$HAL --exampl
 or to build and flash/run
 ```
 cargo embed  --target $TARGET  --features $HAL,$MCU  --chip $CHIP --example xxx
+```
+where `xxx` is one of the examples, such as
+```
+cargo embed  --target $TARGET  --features $HAL,$MCU  --chip $CHIP --example veml6070-uv-display-bp
 ```
 
 

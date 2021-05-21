@@ -99,9 +99,15 @@ jobs:
 
 # matrix  brd x eg gives a job for each example but is is limited to <256. 
 # It is also slow because it seems to rebuild everything for each eg job. (I have not figured out cache correctly.)
-# But it does not stop on failure so is nice for debugging, and the checkmark icons are easy to review.
+# But it does not stop on failure so is nice for debugging, and the green checkmark vs red cross icons are 
+#  easy to review to see which examples fail.
 # Further below generic-bare-metal2 uses a job for each brd and a job step for each example.
-# It is faster but an example failure stops the job. Details are all in the artifact, which are a bit harder to review.
+# It is much faster but an example failure stops the job. Details up to the first failed example are in the 
+#  board job drop down details, which are a bit harder to review and stops at the first failure.
+#
+# A job per example for bluepill gives good example debug info, then for other boards one job with all example
+# gives fast broad coverage.
+ 
   generic-bare-metal:
     name: brd x eg
     runs-on: ubuntu-latest
