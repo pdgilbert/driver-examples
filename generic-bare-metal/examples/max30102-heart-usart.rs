@@ -66,7 +66,7 @@ fn setup() -> (
     Rx<USART1>,
 ) {
     let cp = CorePeripherals::take().unwrap();
-    let mut p = Peripherals::take().unwrap();
+    let mut dp = Peripherals::take().unwrap();
 
     let mut rcc = dp.RCC.configure().freeze(&mut p.FLASH);
 
