@@ -332,7 +332,7 @@ fn setup() -> (I2c<I2C1>, impl LED, Delay) {
     let pwr = dp.PWR.constrain();
     let vos = pwr.freeze();
     let rcc = dp.RCC.constrain();
-    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &p.SYSCFG);
+    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &dp.SYSCFG);
     let clocks = ccdr.clocks;
 
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
