@@ -65,11 +65,11 @@ fn setup() -> (
     Delay,
 ) {
     let cp = CorePeripherals::take().unwrap();
-    let mut p = Peripherals::take().unwrap();
+    let mut dp = Peripherals::take().unwrap();
 
-    let mut rcc = p.RCC.configure().freeze(&mut p.FLASH);
+    let mut rcc = dp.RCC.configure().freeze(&mut dp.FLASH);
 
-    let gpiob = p.GPIOB.split(&mut rcc); // for i2c scl and sda
+    let gpiob = dp.GPIOB.split(&mut rcc); // for i2c scl and sda
 
     let (scl, sda) = cortex_m::interrupt::free(move |cs| {
         (
@@ -78,12 +78,12 @@ fn setup() -> (
         )
     });
 
-    let i2c = I2c::i2c1(p.I2C1, (scl, sda), 100.khz(), &mut rcc);
+    let i2c = I2c::i2c1(dp.I2C1, (scl, sda), 100.khz(), &mut rcc);
 
     let delay = Delay::new(cp.SYST, &rcc);
 
     // led
-    let gpioc = p.GPIOC.split(&mut rcc);
+    let gpioc = dp.GPIOC.split(&mut rcc);
     let led = cortex_m::interrupt::free(move |cs| gpioc.pc13.into_push_pull_output(cs));
 
     impl LED for PC13<Output<PushPull>> {
@@ -224,12 +224,12 @@ use stm32f4xx_hal::{
 #[cfg(feature = "stm32f4xx")]
 fn setup() -> (I2c<I2C2, impl Pins<I2C2>>, impl LED, Delay) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
+    let dp = Peripherals::take().unwrap();
 
-    let rcc = p.RCC.constrain();
+    let rcc = dp.RCC.constrain();
     let clocks = rcc.cfgr.freeze();
 
-    let gpiob = p.GPIOB.split(); // for i2c
+    let gpiob = dp.GPIOB.split(); // for i2c
 
     // can have (scl, sda) using I2C1  on (PB8  _af4, PB9 _af4) or on  (PB6 _af4, PB7 _af4)
     //     or   (scl, sda) using I2C2  on (PB10 _af4, PB3 _af9)
@@ -237,12 +237,12 @@ fn setup() -> (I2c<I2C2, impl Pins<I2C2>>, impl LED, Delay) {
     let scl = gpiob.pb10.into_alternate_af4().set_open_drain(); // scl on PB10
     let sda = gpiob.pb3.into_alternate_af9().set_open_drain(); // sda on PB3
 
-    let i2c = I2c::new(p.I2C2, (scl, sda), 100.khz(), clocks);
+    let i2c = I2c::new(dp.I2C2, (scl, sda), 100.khz(), clocks);
 
     let delay = Delay::new(cp.SYST, clocks);
 
     // led
-    let gpioc = p.GPIOC.split();
+    let gpioc = dp.GPIOC.split();
     let led = gpioc.pc13.into_push_pull_output();
 
     impl LED for PC13<Output<PushPull>> {
@@ -273,18 +273,18 @@ fn setup() -> (
     Delay,
 ) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
-    let mut rcc = p.RCC.constrain();
+    let dp = Peripherals::take().unwrap();
+    let mut rcc = dp.RCC.constrain();
     let clocks = rcc.cfgr.freeze();
 
-    let gpiob = p.GPIOB.split();
-    let gpioc = p.GPIOC.split();
+    let gpiob = dp.GPIOB.split();
+    let gpioc = dp.GPIOC.split();
 
     let scl = gpiob.pb8.into_alternate_af4().set_open_drain(); // scl on PB8
     let sda = gpiob.pb9.into_alternate_af4().set_open_drain(); // sda on PB9
 
     let i2c = BlockingI2c::i2c1(
-        p.I2C1,
+        dp.I2C1,
         (scl, sda),
         Mode::Fast {
             frequency: 00_000.hz(),
@@ -323,15 +323,15 @@ use stm32h7xx_hal::{
 #[cfg(feature = "stm32h7xx")]
 fn setup() -> (I2c<I2C1>, impl LED, Delay) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
-    let pwr = p.PWR.constrain();
+    let dp = Peripherals::take().unwrap();
+    let pwr = dp.PWR.constrain();
     let vos = pwr.freeze();
-    let rcc = p.RCC.constrain();
+    let rcc = dp.RCC.constrain();
     let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &p.SYSCFG);
     let clocks = ccdr.clocks;
 
-    let gpiob = p.GPIOB.split(ccdr.peripheral.GPIOB);
-    let gpioc = p.GPIOC.split(ccdr.peripheral.GPIOC);
+    let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
+    let gpioc = dp.GPIOC.split(ccdr.peripheral.GPIOC);
 
     let scl = gpiob.pb8.into_alternate_af4().set_open_drain(); // scl on PB8
     let sda = gpiob.pb9.into_alternate_af4().set_open_drain(); // sda on PB9
@@ -379,19 +379,19 @@ fn setup() -> (
     Delay,
 ) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
-    let mut rcc = p.RCC.freeze(rcc::Config::hsi16());
+    let dp = Peripherals::take().unwrap();
+    let mut rcc = dp.RCC.freeze(rcc::Config::hsi16());
     let clocks = rcc.clocks;
 
-    let gpiob = p.GPIOB.split(&mut rcc);
-    let gpioc = p.GPIOC.split(&mut rcc);
+    let gpiob = dp.GPIOB.split(&mut rcc);
+    let gpioc = dp.GPIOC.split(&mut rcc);
 
     // could also have scl on PB6, sda on PB7
     //BlockingI2c::i2c1(
     let scl = gpiob.pb8.into_open_drain_output(); // scl on PB8
     let sda = gpiob.pb9.into_open_drain_output(); // sda on PB9
 
-    let i2c = p.I2C1.i2c(sda, scl, 100.khz(), &mut rcc);
+    let i2c = dp.I2C1.i2c(sda, scl, 100.khz(), &mut rcc);
 
     let delay = Delay::new(cp.SYST, clocks);
 
@@ -424,17 +424,17 @@ use stm32l1xx_hal::{
 #[cfg(feature = "stm32l1xx")]
 fn setup() -> (I2c<I2C1, impl Pins<I2C1>>, impl LED, Delay) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
-    let mut rcc = p.RCC.freeze(rcc::Config::hsi());
+    let dp = Peripherals::take().unwrap();
+    let mut rcc = dp.RCC.freeze(rcc::Config::hsi());
     let clocks = rcc.clocks;
 
-    let gpiob = p.GPIOB.split();
+    let gpiob = dp.GPIOB.split();
 
     // could also have scl,sda  on PB6,PB7 or on PB10,PB11
     let scl = gpiob.pb8.into_open_drain_output(); // scl on PB8
     let sda = gpiob.pb9.into_open_drain_output(); // sda on PB9
 
-    let i2c = p.I2C1.i2c((scl, sda), 100.khz(), &mut rcc);
+    let i2c = dp.I2C1.i2c((scl, sda), 100.khz(), &mut rcc);
 
     let delay = Delay::new(cp.SYST, clocks);
 
@@ -469,10 +469,10 @@ fn setup() -> (
     Delay,
 ) {
     let cp = CorePeripherals::take().unwrap();
-    let p = Peripherals::take().unwrap();
-    let mut flash = p.FLASH.constrain();
-    let mut rcc = p.RCC.constrain();
-    let mut pwr = p.PWR.constrain(&mut rcc.apb1r1);
+    let dp = Peripherals::take().unwrap();
+    let mut flash = dp.FLASH.constrain();
+    let mut rcc = dp.RCC.constrain();
+    let mut pwr = dp.PWR.constrain(&mut rcc.apb1r1);
     let clocks = rcc
         .cfgr
         .sysclk(80.mhz())
@@ -480,7 +480,7 @@ fn setup() -> (
         .pclk2(80.mhz())
         .freeze(&mut flash.acr, &mut pwr);
 
-    let mut gpiob = p.GPIOB.split(&mut rcc.ahb2);
+    let mut gpiob = dp.GPIOB.split(&mut rcc.ahb2);
 
     // following ttps://github.com/stm32-rs/stm32l4xx-hal/blob/master/examples/i2c_write.rs
     let mut scl = gpiob
@@ -495,9 +495,9 @@ fn setup() -> (
     sda.internal_pull_up(&mut gpiob.pupdr, true);
     let sda = sda.into_af4(&mut gpiob.moder, &mut gpiob.afrh);
 
-    let i2c = I2c::i2c2(p.I2C2, (scl, sda), 100.khz(), clocks, &mut rcc.apb1r1);
+    let i2c = I2c::i2c2(dp.I2C2, (scl, sda), 100.khz(), clocks, &mut rcc.apb1r1);
 
-    let mut gpioc = p.GPIOC.split(&mut rcc.ahb2);
+    let mut gpioc = dp.GPIOC.split(&mut rcc.ahb2);
 
     let delay = Delay::new(cp.SYST, clocks);
 
