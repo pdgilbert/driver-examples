@@ -68,7 +68,7 @@ fn setup() -> (
     let cp = CorePeripherals::take().unwrap();
     let mut dp = Peripherals::take().unwrap();
 
-    let mut rcc = dp.RCC.configure().freeze(&mut p.FLASH);
+    let mut rcc = dp.RCC.configure().freeze(&mut dp.FLASH);
 
     let gpiob = dp.GPIOB.split(&mut rcc); // for i2c scl and sda
 
@@ -79,7 +79,7 @@ fn setup() -> (
         )
     });
 
-    let i2c = I2c::i2c1(p.I2C1, (scl, sda), 400.khz(), &mut rcc);
+    let i2c = I2c::i2c1(dp.I2C1, (scl, sda), 400.khz(), &mut rcc);
 
     let delay = Delay::new(cp.SYST, &rcc);
 
@@ -105,7 +105,7 @@ fn setup() -> (
         )
     });
 
-    let (tx, rx) = Serial::usart1(p.USART1, (tx, rx), 9600.bps(), &mut rcc).split();
+    let (tx, rx) = Serial::usart1(dp.USART1, (tx, rx), 9600.bps(), &mut rcc).split();
 
     (i2c, led, delay, tx, rx)
 }
