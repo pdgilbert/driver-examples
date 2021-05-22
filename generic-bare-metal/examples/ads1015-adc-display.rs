@@ -375,7 +375,7 @@ fn setup() -> (I2c<I2C1>, impl LED, Delay) {
     let pwr = dp.PWR.constrain();
     let vos = pwr.freeze();
     let rcc = dp.RCC.constrain();
-    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &p.SYSCFG);
+    let ccdr = rcc.sys_ck(160.mhz()).freeze(vos, &dp.SYSCFG);
     let clocks = ccdr.clocks;
 
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
@@ -384,7 +384,7 @@ fn setup() -> (I2c<I2C1>, impl LED, Delay) {
     let scl = gpiob.pb8.into_alternate_af4().set_open_drain(); // scl on PB8
     let sda = gpiob.pb9.into_alternate_af4().set_open_drain(); // sda on PB9
 
-    let i2c = p
+    let i2c = dp
         .I2C1
         .i2c((scl, sda), 400.khz(), ccdr.peripheral.I2C1, &clocks);
 
