@@ -25,7 +25,8 @@
 #![no_std]
 #![no_main]
 
-use ad983x::{ad9833_ad9837::Ad9833Ad9837, Ad983x, FrequencyRegister, SpiInterface, MODE};
+use ad983x::{Ad983x, FrequencyRegister, MODE};
+
 use cortex_m_rt::entry;
 use embedded_hal::digital::v2::OutputPin;
 use libm;
@@ -57,28 +58,23 @@ use stm32f1xx_hal::{
     gpio::{gpioc::PC13, Output, PushPull},
     pac::{CorePeripherals, Peripherals, SPI1},
     prelude::*,
-    spi::{Error, Spi, Spi1NoRemap},
+    spi::{Spi, Spi1NoRemap},
 };
 
 // would like to use something like   fn setup() -> (impl Ad983x, impl LED, Delay) {
 #[cfg(feature = "stm32f1xx")]
 fn setup() -> (
-    Ad983x<
-        SpiInterface<
-            Spi<
-                SPI1,
-                Spi1NoRemap,
-                (
-                    PA5<Alternate<PushPull>>,
-                    PA6<Input<Floating>>,
-                    PA7<Alternate<PushPull>>,
-                ),
-                u8,
-            >,
-            PA4<Output<PushPull>>,
-        >,
-        Ad9833Ad9837,
+    Spi<
+        SPI1,
+        Spi1NoRemap,
+        (
+            PA5<Alternate<PushPull>>,
+            PA6<Input<Floating>>,
+            PA7<Alternate<PushPull>>,
+        ),
+        u8,
     >,
+    PA4<Output<PushPull>>,
     impl LED,
     Delay,
 ) {
@@ -89,7 +85,7 @@ fn setup() -> (
     let mut rcc = dp.RCC.constrain();
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let mut delay = Delay::new(cp.SYST, clocks);
+    let delay = Delay::new(cp.SYST, clocks);
 
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
     let mut gpioa = dp.GPIOA.split(&mut rcc.apb2);
@@ -111,7 +107,7 @@ fn setup() -> (
     );
 
     let mut gpioc = dp.GPIOC.split(&mut rcc.apb2);
-    let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+    let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
     impl LED for PC13<Output<PushPull>> {
         fn on(&mut self) -> () {
@@ -123,9 +119,8 @@ fn setup() -> (
     }
 
     cs.set_high().unwrap();
-    let mut synth = Ad983x::new_ad9833(spi, cs);
 
-    (synth, led, delay)
+    (spi, cs, led, delay)
 }
 
 #[entry]
@@ -133,13 +128,15 @@ fn main() -> ! {
     rtt_init_print!();
     rprintln!("AD9833 example");
 
-    let (synth, mut led, mut delay) = setup();
+    let (spi, cs, mut led, mut delay) = setup();
 
+    let mut synth = Ad983x::new_ad9833(spi, cs);
     synth.reset().unwrap();
     synth.enable().unwrap();
 
     let mut current_register = FrequencyRegister::F0;
     let mut table = MidiTable::default();
+
     loop {
         // Blink LED 0 to check that everything is actually running.
         // If the LED 0 does not blink, something went wrong.
