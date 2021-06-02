@@ -535,6 +535,10 @@ fn main() -> ! {
     let stcint = gpiob.pb6.into_pull_up_input(&mut gpiob.crl);
     let seekdown = gpiob.pb11.into_pull_down_input(&mut gpiob.crh);
     let seekup = gpiob.pb10.into_pull_down_input(&mut gpiob.crh);
+
+    // see https://github.com/eldruin/driver-examples/issues/2
+    // and si4703-fm-radio-display.rs is more developed but also not working
+
     reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
 
     let manager = shared_bus::BusManager::<cortex_m::interrupt::Mutex<_>, _>::new(i2c);

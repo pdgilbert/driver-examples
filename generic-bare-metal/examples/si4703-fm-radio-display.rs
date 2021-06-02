@@ -151,6 +151,7 @@ fn setup() -> (
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
+    let delay = Delay::new(cp.SYST, clocks);
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
 
     let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
@@ -158,6 +159,12 @@ fn setup() -> (
     let scl = gpiob.pb8.into_alternate_open_drain(&mut gpiob.crh);
     let sda = gpiob.pb9.into_alternate_open_drain(&mut gpiob.crh);
     //let sda = gpiob.pb9.into_push_pull_output(&mut gpiob.crh);
+
+    let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
+
+    // see https://github.com/eldruin/driver-examples/issues/2
+
+    reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
 
     let i2c = BlockingI2c::i2c1(
         dp.I2C1,
@@ -177,7 +184,6 @@ fn setup() -> (
 
     let mut gpioc = dp.GPIOC.split(&mut rcc.apb2);
     let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
-    let delay = Delay::new(cp.SYST, clocks);
 
     impl LED for PC13<Output<PushPull>> {
         fn on(&mut self) -> () {
@@ -205,8 +211,8 @@ fn setup() -> (
     }
 
     let mut rst = gpiob.pb7.into_push_pull_output(&mut gpiob.crl);
-    //let z = reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
-    let z = reset_si4703(&mut rst, &mut sda, &mut delay);
+    //reset_si4703(&mut rst, &mut sda, &mut delay).unwrap();
+    //let z = reset_si4703(&mut rst, &mut sda, &mut delay);
 
     (i2c, led, delay, buttons, stcint)
 }

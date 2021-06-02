@@ -68,12 +68,12 @@ cortex-m = "0.6"
 cortex-m-rt = "0.6.5"
 cortex-m-rtic = "0.5.3"
 
-#next is only used in ccs811-gas-voc-usart-logger-bp and ccs811-gas-voc-usart-logger-bp which 
-# are exclude for other. It causes 
+# shared-bus-rticnext is used in ccs811-gas-voc-usart-logger and ccs811-gas-voc-usart-logger.
+# Since stm32f0xx-hal and stm32l0xx-hal do not support CAS, with those HALs it causes 
 #  atomic.compare_exchange(current, new, success, failure)
 #         ^^^^^^^^^^^^^^^^ method not found in `&AtomicBool
 # see https://github.com/eldruin/driver-examples/issues/3
-#shared-bus-rtic = "0.2.2"  
+shared-bus-rtic = { version = "0.2.2", optional = true }
 
 panic-rtt-target = { version =  "0.1.1", features = ["cortex-m"] }
 rtt-target = { version =  "0.2.2", features = ["cortex-m"] }
@@ -109,30 +109,30 @@ stm32l0xx = []
 stm32l1xx = []
 stm32l4xx = []
 
-stm32f030xc = ["stm32f0xx-hal/stm32f030xc", "stm32f0xx-hal/rt"]
-stm32f042   = ["stm32f0xx-hal/stm32f042",   "stm32f0xx-hal/rt"]
-stm32f100 = ["stm32f1xx-hal/stm32f100", "stm32f1xx-hal/rt"]
-stm32f101 = ["stm32f1xx-hal/stm32f101", "stm32f1xx-hal/rt"]
-stm32f103 = ["stm32f1xx-hal/stm32f103", "stm32f1xx-hal/rt", "stm32f1xx-hal/medium"]
-stm32f303xc = ["stm32f3xx-hal/stm32f303xc", "stm32f3xx-hal/rt"] 
-stm32f401 = ["stm32f4xx-hal/stm32f401", "stm32f4xx-hal/rt"] 
-stm32f405 = ["stm32f4xx-hal/stm32f405", "stm32f4xx-hal/rt"] 
-stm32f411 = ["stm32f4xx-hal/stm32f411", "stm32f4xx-hal/rt"] 
-stm32f722 = ["stm32f7xx-hal/stm32f722", "stm32f7xx-hal/rt"] 
-stm32h742 = ["stm32h7xx-hal/stm32h742", "stm32h7xx-hal/rt"]
+stm32f030xc   = ["stm32f0xx-hal/stm32f030xc", "stm32f0xx-hal/rt"]
+stm32f042     = ["stm32f0xx-hal/stm32f042",   "stm32f0xx-hal/rt"]
+stm32f100     = ["stm32f1xx-hal/stm32f100",   "stm32f1xx-hal/rt"]
+stm32f101     = ["stm32f1xx-hal/stm32f101",   "stm32f1xx-hal/rt", "shared-bus-rtic"]
+stm32f103     = ["stm32f1xx-hal/stm32f103",   "stm32f1xx-hal/rt", "shared-bus-rtic", "stm32f1xx-hal/medium"]
+stm32f303xc   = ["stm32f3xx-hal/stm32f303xc", "stm32f3xx-hal/rt", "shared-bus-rtic"] 
+stm32f401     = ["stm32f4xx-hal/stm32f401",   "stm32f4xx-hal/rt", "shared-bus-rtic"] 
+stm32f405     = ["stm32f4xx-hal/stm32f405",   "stm32f4xx-hal/rt", "shared-bus-rtic"] 
+stm32f411     = ["stm32f4xx-hal/stm32f411",   "stm32f4xx-hal/rt", "shared-bus-rtic"] 
+stm32f722     = ["stm32f7xx-hal/stm32f722",   "stm32f7xx-hal/rt", "shared-bus-rtic"] 
+stm32h742     = ["stm32h7xx-hal/stm32h742",   "stm32h7xx-hal/rt", "shared-bus-rtic"]
 # see https://www.st.com/resource/en/datasheet/stm32l072v8.pdf  p12 for some MCU variants
-stm32l0x2 =    ["stm32l0xx-hal/stm32l0x2", "stm32l0xx-hal/rt", "stm32l0xx-hal/mcu-STM32L072KZTx"]
-stm32l072kztx = ["stm32l0xx-hal/stm32l0x2", "stm32l0xx-hal/rt", "stm32l0xx-hal/mcu-STM32L072KZTx"]
-stm32l0x1 = ["stm32l0xx-hal/stm32l0x1", "stm32l0xx-hal/rt", "stm32l0xx-hal/mcu-STM32L071KBTx"]
-stm32l100 = ["stm32l1xx-hal/stm32l100", "stm32l1xx-hal/rt"]
-stm32l151 = ["stm32l1xx-hal/stm32l151", "stm32l1xx-hal/rt"]
-stm32l4x1 = ["stm32l4xx-hal/stm32l4x1", "stm32l4xx-hal/rt"]
-stm32l4x2 = ["stm32l4xx-hal/stm32l4x2", "stm32l4xx-hal/rt"]
-stm32l4x6 = ["stm32l4xx-hal/stm32l4x6", "stm32l4xx-hal/rt"]
+stm32l0x2     =    ["stm32l0xx-hal/stm32l0x2","stm32l0xx-hal/rt",                    "stm32l0xx-hal/mcu-STM32L072KZTx"]
+stm32l072kztx = ["stm32l0xx-hal/stm32l0x2",   "stm32l0xx-hal/rt",                    "stm32l0xx-hal/mcu-STM32L072KZTx"]
+stm32l0x1     = ["stm32l0xx-hal/stm32l0x1",   "stm32l0xx-hal/rt", "shared-bus-rtic", "stm32l0xx-hal/mcu-STM32L071KBTx"]
+stm32l100     = ["stm32l1xx-hal/stm32l100",   "stm32l1xx-hal/rt", "shared-bus-rtic"]
+stm32l151     = ["stm32l1xx-hal/stm32l151",   "stm32l1xx-hal/rt", "shared-bus-rtic"]
+stm32l4x1     = ["stm32l4xx-hal/stm32l4x1",   "stm32l4xx-hal/rt", "shared-bus-rtic"]
+stm32l4x2     = ["stm32l4xx-hal/stm32l4x2",   "stm32l4xx-hal/rt", "shared-bus-rtic"]
+stm32l4x6     = ["stm32l4xx-hal/stm32l4x6",   "stm32l4xx-hal/rt", "shared-bus-rtic"]
 
 [[example]]
-name = "ad9833-midi-player-bp"
-path = "examples/ad9833-midi-player-bp.rs"
+name = "ad9833-midi-player"
+path = "examples/ad9833-midi-player.rs"
 
 [[example]]
 name = "ads1015-adc-display"
@@ -234,10 +234,10 @@ path = "examples/veml6070-uv-display.rs"
 name = "veml6075-uv-display"
 path = "examples/veml6075-uv-display.rs"
 
-#[[example]]
-#name = "ccs811-gas-voc-usart-logger"
-#path = "examples/ccs811-gas-voc-usart-logger-bp.rs"
-#
-#[[example]]
-#name = "iaq-core-c-gas-voc-usart-logger"
-#path = "examples/iaq-core-c-gas-voc-usart-logger.rs"
+[[example]]
+name = "ccs811-gas-voc-usart-logger"
+path = "examples/ccs811-gas-voc-usart-logger.rs"
+
+[[example]]
+name = "iaq-core-c-gas-voc-usart-logger"
+path = "examples/iaq-core-c-gas-voc-usart-logger.rs"
