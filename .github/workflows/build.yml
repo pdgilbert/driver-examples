@@ -119,7 +119,7 @@ jobs:
               #none-stm32f722, none-stm32h742, discovery-stm32l100, heltec-lora-node151, none-stm32l4x2,
               #none-stm32f100, none-stm32f101, none-stm32f042, none-stm32f030, none-stm32l0x2, 
         
-        eg:  [ad9833-midi-player-bp,   ads1015-adc-display,              at24c256-eeprom,   
+        eg:  [ad9833-midi-player,      ads1015-adc-display,              at24c256-eeprom,   
               bmi160-imu-display,      ccs811-gas-voc-display,           ccs811-gas-voc-hdc2080-display, 
               ds1307-rtc,              hdc2080-temp-humidity-display,    iaq-core-c-gas-voc-display, 
               isl29125-color-display,  max17043-battery-monitor-display, max30102-heart-usart, 
