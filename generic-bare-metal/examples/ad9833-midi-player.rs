@@ -59,7 +59,7 @@ use stm32f0xx_hal::{
     },
     pac::{CorePeripherals, Peripherals, SPI1},
     prelude::*,
-    spi::{EightBit, Spi}  //, SckPin, MisoPin, MosiPin},
+    spi::{EightBit, Spi}, //, SckPin, MisoPin, MosiPin},
 };
 
 #[cfg(feature = "stm32f0xx")]
